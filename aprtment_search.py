@@ -31,7 +31,7 @@ def generate_url():
     url_end = "/?key=%E5%B9%BF%E5%B7%9E"
     url = url_begin + url_end
     opener = requests.Session()
-    doc = opener.get(url, timeout=5, headers=agents.get_header()).text
+    doc = opener.get(url, timeout=30, headers=agents.get_header()).text
     soup = BeautifulSoup(doc)
     content = soup.findAll(name="span", attrs={"class": "fred fTahoma"})
     total_number = str(content[0])[27:-7]
@@ -53,8 +53,17 @@ def get_apt_id_set():
 
 def generate_detail(url):
     global apt_id_set
+    tries = 3
     opener = requests.Session()
-    doc = opener.post(url, timeout=20).text
+    while(tries > 0):
+        try:
+            doc = opener.post(url, timeout=30, headers=agents.get_header()).text
+            break
+        except Exception as e:
+            tries -= 1
+            print e
+    else:
+        print "error"
     selector = etree.HTML(doc.encode("utf-8"))
     content_element = selector.xpath("//*[@class=\"house-item clearfix\"]/@id")
     content_number = len(content_element)
@@ -100,8 +109,10 @@ def generate_detail(url):
                     apt_floor_type_s = apt_floor_s[0]
                     apt_floor_type = ut.dict_replace(
                         apt_floor_type_s, di.dict_floor_type)
-                if apt_floor_s[1]:
-                    apt_floor_number = apt_floor_s[1][0:-1]
+                if len(apt_floor_s) > 1:
+                    apt_floor_number = apt_floor_s[1][:-1]
+                else:
+                    apt_floor_number = 0
             apt_direction = apt_direction_element[i].xpath('string(.)')
             if apt_direction:
                 apt_direction_en = ut.dict_replace(
