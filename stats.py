@@ -14,22 +14,15 @@ import config
 
 processed_sum_page = 0
 processed_record = 0
-processed_pmid = 0
 success_sum_page = 0
 success_record = 0
-success_pmid = 0
 failed_sum_page = 0
 failed_record = 0
-failed_pmid = 0
 skipped_sum_page = 0
 skipped_record = 0
-skipped_pmid = 0
-c_skipped_pmid = 0
 
-crawl_pmid_start = ""
-crawl_pmid_finish = ""
-crawl_detail_start = ""
-crawl_detail_finish = ""
+task_start = ""
+task_finish = ""
 
 
 def last_task_duration(project, sstr):

@@ -14,6 +14,8 @@ import mongodb_handler as mh
 import utilities as ut
 import dictionary as di
 from BeautifulSoup import BeautifulSoup
+import message as msg
+import stats
 
 
 apt_id_set = []
@@ -43,9 +45,6 @@ def generate_url():
     return url_set
 
 
-url = "http://gz.centanet.com/ershoufang/t1"
-
-
 def get_apt_id_set():
     global apt_id_set
     apt_id_set = mh.read_apt_id_all()
@@ -57,13 +56,17 @@ def generate_detail(url):
     opener = requests.Session()
     while(tries > 0):
         try:
-            doc = opener.post(url, timeout=30, headers=agents.get_header()).text
+            doc = opener.post(
+                url, timeout=30, headers=agents.get_header()).text
+            stats.success_sum_page += 1
+            msg.msg("index page", stats.success_sum_page, "load", "succ", "info", msg.display, msg.stat)
             break
         except Exception as e:
             tries -= 1
-            print e
+            msg.msg("index page", stats.success_sum_page, "retrieve", str(e), "error", msg.log)
+            msg.msg("index page", stats.success_sum_page, "retrieve", "succ", "notice", msg.display)
     else:
-        print "error"
+        msg.msg("index page", stats.success_sum_page, "load", "fail", "error", msg.display, msg.log)
     selector = etree.HTML(doc.encode("utf-8"))
     content_element = selector.xpath("//*[@class=\"house-item clearfix\"]/@id")
     content_number = len(content_element)
@@ -88,14 +91,14 @@ def generate_detail(url):
     apt_total_price_element = selector.xpath(
         "//*[@class=\"house-item clearfix\"]/div[2]/p[1]/span")
     apt_average_price_element = selector.xpath(
-        "//*[@class=\"house-item clearfix\"]/div[2]/p[1]/span")
+        "//*[@class=\"house-item clearfix\"]/div[2]/p[2]")
     zone_average_price_element = selector.xpath(
         "//*[@class=\"house-item clearfix\"]/div[2]/p[3]")
     i = 0
     for i in range(0, content_number):
         apt_id = content_element[i]
+        title = title_element[i].xpath('string(.)')
         if not apt_id in apt_id_set:
-            title = title_element[i].xpath('string(.)')
             zone = zone_element[i].xpath('string(.)')
             apt_type = apt_type_element[i].xpath('string(.)')
             if apt_type:
@@ -121,9 +124,7 @@ def generate_detail(url):
             if apt_decoration:
                 apt_decoration_en = ut.dict_replace(
                     apt_decoration, di.dict_decoration)
-            apt_year = apt_year_element[i].xpath('string(.)')
-            if apt_year:
-                apt_year = apt_year[0:4]
+            apt_year = apt_year_element[i].xpath('string(.)')[0:4]
             apt_location = apt_location_element[i].xpath('string(.)')
             if apt_location:
                 apt_location_s = apt_location.split(" ")
@@ -134,9 +135,10 @@ def generate_detail(url):
                     sub_district = district_s_s[1]
                 street = apt_location_s[1]
             apt_total_price = apt_total_price_element[i].xpath('string(.)')
-            apt_average_price = apt_average_price_element[i].xpath('string(.)')
+            apt_average_price = apt_average_price_element[i].xpath('string(.)')[
+                :-3]
             zone_average_price = zone_average_price_element[i].xpath(
-                'string(.)')
+                'string(.)')[5:-3]
             apartment_record = {
                 "ctime": ut.time_str("full"),
                 "apt_id": apt_id,
@@ -168,13 +170,17 @@ def generate_detail(url):
             mh.add_record(apartment_record, "apartment")
             mh.add_record(price_record, "price")
             apt_id_set.append(apt_id)
-            print "saved record: " + apt_id
+            msg.msg("record", title, "retrieve", "succ", "info", msg.display)
         else:
-            print "skipped record: " + apt_id
+            msg.msg("record", title, "skip", "succ", "info", msg.display)
 
 
 if __name__ == "__main__":
+    msg.msg("task", ut.time_str("full"), "start", "succ", "important", msg.log, msg.display, msg.stat)
     get_apt_id_set()
     url_list  = generate_url()
     for url in url_list:
         generate_detail(url)
+    msg.msg("task", ut.time_str("full"), "finish", "succ", "important", msg.log, msg.display, msg.stat)
+    # url = "http://gz.centanet.com/ershoufang/t1"
+    # generate_detail(url)
