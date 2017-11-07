@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import requests
 import mongodb_handler as mh
 import message as msg
+import utilities as ut
 
 
 def geocodeG(address):  # 使用高德API
@@ -32,6 +33,7 @@ def get_geocode_baidu(city, address):  # 使用百度API
 
 
 def loc_2_geocode(number):  # 地址转为geocode
+    msg.msg("update location", ut.time_str("full"), "start", "succ", "important", msg.log, msg.display)
     address_set = mh.read_address_many(number)  # 先提取没有geocode的这些
     for address in address_set:
         location_record = mh.read_location(address[1], address[2])  # 读取本地有无记录
@@ -44,6 +46,7 @@ def loc_2_geocode(number):  # 地址转为geocode
             msg.msg("location info",
                     address[2], "web retrieve", "succ", "info", msg.display)
         mh.update_geocode(address[0], geocode[1], geocode[0])  # 把地理记录录入数据库
+    msg.msg("update location", ut.time_str("full"), "finish", "succ", "important", msg.log, msg.display)
 
 
 if __name__ == '__main__':

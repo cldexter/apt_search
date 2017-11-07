@@ -63,7 +63,7 @@ def add_new_log(when, who, identifier, action, result, info_type):
 def read_address_many(number):
     record = []
     for data in get_db("apartment").find({"status": 1}).limit(number):
-        record.append([data["apt_id"], data["city"], data['disctrict'] +
+        record.append([data["apt_id"], data["city"], data['district'] +
                        data['sub_district'] + data["street"] + data["zone"]])
     return record
 
@@ -87,11 +87,9 @@ def read_location(city, address):
 
 def upgrade_status():
     get_db("apartment").update({'_id': {'$exists': True}}, {
-        '$set': {"apt_type": "二手"}}, multi=True)
+        '$set': {"city": "广州","source":"中原地产"}}, multi=True)
 
 
 if __name__ == "__main__":
     # print read_address_many(1)
-    # upgrade_status()
-    add_location("广州", "暨南大学", 0, 0)
-    print read_location("广州","暨南大学")
+    upgrade_status()

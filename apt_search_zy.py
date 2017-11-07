@@ -1,6 +1,14 @@
 #! /usr/bin/env python
 # coding=utf-8
 # -*- coding:utf-8 -*-
+"""
+-------------------------------------------------
+   File Name: mongodb_handler.py
+   Description: 处理一切与mongodb对接的工作
+   Author: Dexter Chen
+   Date：2017-09-28
+-------------------------------------------------
+"""
 
 from __future__ import unicode_literals
 import sys
@@ -18,13 +26,11 @@ import message as msg
 import stats
 
 
-apt_id_set = []
-
-
 default_encoding = 'utf-8'
 if sys.getdefaultencoding() != default_encoding:
     reload(sys)
     sys.setdefaultencoding(default_encoding)
+apt_id_set = []
 
 
 def generate_url():
@@ -58,15 +64,18 @@ def generate_detail(url):
         try:
             doc = opener.post(
                 url, timeout=30, headers=agents.get_header()).text
-            stats.success_sum_page += 1
-            msg.msg("index page", stats.success_sum_page, "load", "succ", "info", msg.display, msg.stat)
+            msg.msg("index page", stats.success_sum_page, "load",
+                    "succ", "info", msg.display, msg.stat)
             break
         except Exception as e:
             tries -= 1
-            msg.msg("index page", stats.success_sum_page, "retrieve", str(e), "error", msg.log)
-            msg.msg("index page", stats.success_sum_page, "retrieve", "succ", "notice", msg.display)
+            msg.msg("index page", stats.success_sum_page,
+                    "retrieve", str(e), "error", msg.log)
+            msg.msg("index page", stats.success_sum_page,
+                    "retrieve", "succ", "notice", msg.display)
     else:
-        msg.msg("index page", stats.success_sum_page, "load", "fail", "error", msg.display, msg.log)
+        msg.msg("index page", stats.success_sum_page, "load",
+                "fail", "error", msg.display, msg.log)
     selector = etree.HTML(doc.encode("utf-8"))
     content_element = selector.xpath("//*[@class=\"house-item clearfix\"]/@id")
     content_number = len(content_element)
@@ -143,11 +152,13 @@ def generate_detail(url):
                 "ctime": ut.time_str("full"),
                 "apt_id": apt_id,
                 "title": title,
+                "city": "广州",
                 "zone": zone,
                 # "apt_type": apt_type,
                 "br_number": br_number,
                 "lr_number": lr_number,
                 # "apt_floor": apt_floor,
+                "apt_area": apt_area,
                 "apt_floor_type": apt_floor_type,
                 "apt_floor_number": apt_floor_number,
                 # "apt_direction": apt_direction,
@@ -156,9 +167,14 @@ def generate_detail(url):
                 "apt_decoration_en": apt_decoration_en,
                 "apt_year": apt_year,
                 # "apt_location": apt_location,
-                "disctrict": district,
+                "district": district,
                 "sub_district": sub_district,
                 "street": street
+                "apt_lat": "",
+                "apt_lng": "",
+                "apt_type": "二手"，
+                "status": 1,
+                "source": '中原地产'
             }
             price_record = {
                 "ctime": ut.time_str("full"),
@@ -175,12 +191,16 @@ def generate_detail(url):
             msg.msg("record", title, "skip", "succ", "info", msg.display)
 
 
-if __name__ == "__main__":
-    msg.msg("task", ut.time_str("full"), "start", "succ", "important", msg.log, msg.display, msg.stat)
+def crawl_apartment():
+    msg.msg("crawl apartment", ut.time_str("full"), "start",
+            "succ", "important", msg.log, msg.display, msg.stat)
     get_apt_id_set()
-    url_list  = generate_url()
+    url_list = generate_url()
     for url in url_list:
         generate_detail(url)
-    msg.msg("task", ut.time_str("full"), "finish", "succ", "important", msg.log, msg.display, msg.stat)
-    # url = "http://gz.centanet.com/ershoufang/t1"
-    # generate_detail(url)
+    msg.msg("crawl apartment", ut.time_str("full"), "finish",
+            "succ", "important", msg.log, msg.display, msg.stat)
+
+
+if __name__ == "__main__":
+    crawl_apartment()
