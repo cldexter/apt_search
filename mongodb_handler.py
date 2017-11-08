@@ -90,6 +90,11 @@ def upgrade_status():
         '$set': {"city": "广州","source":"中原地产"}}, multi=True)
 
 
+def rename_column():
+    get_db("apartment").update({}, {"$rename" : {"disctrict" : "district"}}, false, true)
+
+
 if __name__ == "__main__":
     # print read_address_many(1)
-    upgrade_status()
+    # upgrade_status()
+    rename_column()
