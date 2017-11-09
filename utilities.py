@@ -33,12 +33,22 @@ def time_object(time_str):
     return time.strptime(time_str, "%Y-%m-%d %X")
 
 
-def str_duration(early_time_str, late_time_str): # 计算两个时间str之间的时间差，默认输出h，也可输出min
+def time_str_duration(early_time_str, late_time_str, time_unit="day"): # 计算两个时间str之间的时间差，默认输出s，也可输出min
     early_time_object = datetime.datetime.strptime(early_time_str, "%Y-%m-%d %X")
     late_time_object = datetime.datetime.strptime(late_time_str, "%Y-%m-%d %X")
     duration_delta = late_time_object - early_time_object
     duration_in_seconds = int(duration_delta.total_seconds())
-    return duration_in_seconds
+    if time_unit == "second":
+        return duration_in_seconds
+    elif time_unit == "minute":
+        return duration_in_seconds / 60
+    elif time_unit == "hour":
+        return duration_in_seconds / 3600
+    elif time_unit == "day":
+        return duration_in_seconds / 86400
+    else:
+        return "error"
+
 
 # 用于根据字典文件替换
 def dict_replace(data, re_dict):
@@ -68,6 +78,6 @@ def cur_file_dir():  # 获取脚本路径
 
 
 if __name__ == '__main__':
-    print str_duration("2010-10-10 10:10:10", "2010-10-10 11:10:10")
+    print time_str_duration("2010-10-10 10:10:10", "2010-10-10 11:10:10")
     print time_str("full")
     print time_str("full", 30)

@@ -57,10 +57,13 @@ def add_new_log(when, who, identifier, action, result, info_type):
             "action": action, "result": result, "info_type": info_type}
     get_db('log').insert_one(data)
 
-# 读取地址
+
+def read_last_run():
+    data = get_db("log").find_one({"who":"task", "action":"finish","result":"succ", "info_type":"important"})["ctime"]
+    return data
 
 
-def read_address_many(number):
+def read_address_many(number):# 读取地址
     record = []
     for data in get_db("apartment").find({"status": 1}).limit(number):
         record.append([data["apt_id"], data["city"], data['district'] +
@@ -90,11 +93,7 @@ def upgrade_status():
         '$set': {"city": "广州","source":"中原地产"}}, multi=True)
 
 
-def rename_column():
-    get_db("apartment").update({}, {"$rename" : {"disctrict" : "district"}}, false, true)
-
-
 if __name__ == "__main__":
     # print read_address_many(1)
     # upgrade_status()
-    rename_column()
+    print read_last_run()
