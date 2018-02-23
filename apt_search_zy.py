@@ -221,4 +221,4 @@ def crawl_apartment(run_type):
 
 
 if __name__ == "__main__":
-    crawl_apartment("price")
+    crawl_apartment("full")
